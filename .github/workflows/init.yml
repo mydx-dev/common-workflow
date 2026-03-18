@@ -50,6 +50,8 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.GAS_BOOST_PAT }}
 
             - uses: actions/setup-node@v4
               with:
@@ -67,6 +69,13 @@ jobs:
                   echo "@mydx-dev:registry=https://npm.pkg.github.com" >> .npmrc
               env:
                   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+            - name: Configure clasp credentials
+              run: |
+                  printf '%s' "$CLASP_CREDENTIALS" > ~/.clasprc.json
+                  chmod 600 ~/.clasprc.json
+              env:
+                  CLASP_CREDENTIALS: ${{ secrets.CLASP_CREDENTIALS }}
 
             - name: Initialize project
               run: |
