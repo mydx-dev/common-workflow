@@ -70,6 +70,7 @@ jobs:
                   if [ "${{ inputs.skip_git }}" = "true" ]; then ARGS="$ARGS --skip-git"; fi
                   pnpm dlx @mydx-dev/gas-boost-cli@latest init "$NPM_TOKEN" \
                       $ARGS \
+                      --name "${{ inputs.project_name }}" \
                       --envs "${{ inputs.envs }}" \
                       --default-env "${{ inputs.default_env }}" \
                       --project-type "${{ inputs.project_type }}"
