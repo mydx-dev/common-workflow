@@ -28,7 +28,7 @@ permissions:
 
 jobs:
     deploy:
-        if: ${{ github.repository_owner == 'mydx-dev' }}
+        if: ${{ contains(fromJSON('["mydx-dev","taiga-automate-growth"]'), github.repository_owner) }}
         runs-on: ubuntu-latest
         environment: ${{ inputs.environment }}
         steps:
