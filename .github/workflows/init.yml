@@ -108,7 +108,7 @@ jobs:
                       || echo "Skip $ENV: scriptId not found"
                   done
               env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GH_TOKEN: ${{ secrets.GAS_BOOST_PAT }}
 
             - name: Commit and push changes
               run: |
