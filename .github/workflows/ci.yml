@@ -1,0 +1,39 @@
+name: CI
+
+on:
+    workflow_call:
+
+permissions:
+    contents: read
+    packages: read
+
+jobs:
+    ci:
+        if: ${{ github.repository_owner == 'mydx-dev' }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "pnpm"
+
+            - run: corepack enable
+
+            - name: Configure npm auth
+              run: |
+                  echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" > .npmrc
+                  echo "@mydx-dev:registry=https://npm.pkg.github.com" >> .npmrc
+              env:
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+            - run: pnpm install
+
+            - name: Lint (if config exists)
+              run: |
+                  if [ -f eslint.config.mjs ]; then pnpm exec eslint .; fi
+
+            - name: Test (if config exists)
+              run: |
+                  if [ -f vitest.config.js ]; then pnpm exec vitest --run; fi

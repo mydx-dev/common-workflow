@@ -1,0 +1,104 @@
+name: Init Project
+
+on:
+    workflow_call:
+        inputs:
+            project_name:
+                description: "Project name"
+                required: true
+                type: string
+            envs:
+                description: "Comma separated envs"
+                required: true
+                type: string
+            default_env:
+                description: "Default env"
+                required: true
+                type: string
+            project_type:
+                description: "Project type"
+                required: true
+                type: string
+            create_new:
+                description: "Create new GAS project"
+                required: false
+                type: boolean
+                default: false
+            use_frontend:
+                description: "Use frontend setup"
+                required: false
+                type: boolean
+                default: false
+            skip_git:
+                description: "Skip git init"
+                required: false
+                type: boolean
+                default: true
+
+permissions:
+    contents: write
+    pull-requests: write
+    packages: read
+    actions: write
+
+jobs:
+    init:
+        if: ${{ github.repository_owner == 'mydx-dev' }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "pnpm"
+
+            - run: corepack enable
+
+            - name: Configure npm auth
+              run: |
+                  echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" > .npmrc
+                  echo "@mydx-dev:registry=https://npm.pkg.github.com" >> .npmrc
+              env:
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+            - name: Initialize project
+              run: |
+                  ARGS="--here --yes"
+                  if [ "${{ inputs.create_new }}" = "true" ]; then ARGS="$ARGS --create-new"; fi
+                  if [ "${{ inputs.use_frontend }}" = "true" ]; then ARGS="$ARGS --use-frontend"; fi
+                  if [ "${{ inputs.skip_git }}" = "true" ]; then ARGS="$ARGS --skip-git"; fi
+                  pnpm dlx @mydx-dev/gas-boost-cli@latest init "$NPM_TOKEN" \
+                      $ARGS \
+                      --envs "${{ inputs.envs }}" \
+                      --default-env "${{ inputs.default_env }}" \
+                      --project-type "${{ inputs.project_type }}"
+              env:
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+            - name: Sync secrets (if scriptId exists)
+              run: |
+                  set -e
+                  ENVS="${{ inputs.envs }}"
+                  for ENV in ${ENVS//,/ } ; do
+                    FILE="config/.clasp.${ENV}.json"
+                    if [ ! -f "$FILE" ]; then
+                      echo "Skip $ENV: $FILE not found"
+                      continue
+                    fi
+                    node -e "const fs=require('fs');const j=JSON.parse(fs.readFileSync('$FILE','utf8'));if(!j.scriptId){process.exit(2)}" \
+                      && pnpm dlx @mydx-dev/gas-boost-cli@latest secrets sync "$ENV" \
+                           --gh-env "$ENV" \
+                      || echo "Skip $ENV: scriptId not found"
+                  done
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Create pull request
+              uses: peter-evans/create-pull-request@v6
+              with:
+                  commit-message: "chore: initialize gas-boost project"
+                  title: "chore: initialize gas-boost project"
+                  body: "Automated project initialization."
+                  branch: "automation/init"
+                  delete-branch: true
