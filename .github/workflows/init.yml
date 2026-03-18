@@ -40,6 +40,7 @@ permissions:
     pull-requests: write
     packages: read
     actions: write
+    workflows: write
 
 env:
     FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
