@@ -92,9 +92,10 @@ jobs:
             - name: Persist deploy ID
               if: ${{ steps.deploy.outputs.deploy_id != '' && vars.DEPLOY_ID == '' }}
               run: |
-                  gh api -X PUT \
-                    /repos/${GITHUB_REPOSITORY}/environments/${ENV_NAME}/variables/DEPLOY_ID \
-                    -f value="${DEPLOY_ID}"
+                  gh variable set DEPLOY_ID \
+                    --env "${ENV_NAME}" \
+                    --body "${DEPLOY_ID}" \
+                    --repo "${GITHUB_REPOSITORY}"
               env:
                   ENV_NAME: ${{ inputs.environment }}
                   DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
