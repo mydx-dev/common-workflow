@@ -91,9 +91,21 @@ jobs:
               env:
                   ENVIRONMENT: ${{ inputs.environment }}
 
+            - name: Debug clasp status (repo root, before push)
+              run: |
+                  npx clasp status -P config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
+              env:
+                  ENVIRONMENT: ${{ inputs.environment }}
+
             - name: Push to GAS
               run: |
                   pnpm gas-boost push ${{ inputs.environment }}
+
+            - name: Debug clasp status (repo root, after push)
+              run: |
+                  npx clasp status -P config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
+              env:
+                  ENVIRONMENT: ${{ inputs.environment }}
 
             - name: Debug dist output
               run: |
