@@ -26,12 +26,15 @@ permissions:
     packages: read
     pull-requests: write
     issues: write
+    actions: write
 
 jobs:
     deploy:
         if: ${{ contains(fromJSON('["mydx-dev","taiga-automate-growth"]'), github.repository_owner) }}
         runs-on: ubuntu-latest
         environment: ${{ inputs.environment }}
+        env:
+            DEPLOY_ID: ${{ vars.DEPLOY_ID }}
         steps:
             - uses: actions/checkout@v4
               with:
@@ -79,7 +82,32 @@ jobs:
               run: |
                   pnpm exec gas-boost deploy ${{ inputs.environment }} | tee deploy.log
                   URL=$(grep -Eo 'WEB_APP_URL=\S+' deploy.log | tail -n1 | cut -d= -f2-)
+                  DEPLOY_ID=$(grep -Eo 'DEPLOY_ID=\S+' deploy.log | tail -n1 | cut -d= -f2-)
                   echo "web_app_url=$URL" >> $GITHUB_OUTPUT
+                  echo "deploy_id=$DEPLOY_ID" >> $GITHUB_OUTPUT
+
+            - name: Persist deploy ID
+              if: ${{ steps.deploy.outputs.deploy_id != '' && vars.DEPLOY_ID == '' }}
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const repositoryId = context.payload.repository?.id;
+                      if (!repositoryId) {
+                        core.setFailed('Repository id not found.');
+                        return;
+                      }
+                      await github.request(
+                        'PUT /repositories/{repository_id}/environments/{environment_name}/variables/{name}',
+                        {
+                          repository_id: repositoryId,
+                          environment_name: process.env.ENV_NAME,
+                          name: 'DEPLOY_ID',
+                          value: process.env.DEPLOY_ID,
+                        },
+                      );
+              env:
+                  ENV_NAME: ${{ inputs.environment }}
+                  DEPLOY_ID: ${{ steps.deploy.outputs.deploy_id }}
 
             - name: Detect PR number
               id: pr
