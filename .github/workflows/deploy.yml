@@ -77,7 +77,7 @@ jobs:
             - name: Debug gas-boost version
               run: |
                   node -e "const p=require('./package.json');console.log('gas-boost-cli dep:', p.devDependencies?.['@mydx-dev/gas-boost-cli'] || p.dependencies?.['@mydx-dev/gas-boost-cli'] || 'missing');"
-                  npx -y -p dotenv -p vite -p @mydx-dev/gas-boost-cli@latest gas-boost --version
+                  pnpm exec gas-boost --version
 
             - name: Normalize clasp rootDir
               run: |
@@ -92,7 +92,7 @@ jobs:
                   ENVIRONMENT: ${{ inputs.environment }}
 
             - name: Push to GAS
-              run: npx -y -p dotenv -p vite -p @mydx-dev/gas-boost-cli@latest gas-boost push ${{ inputs.environment }}
+              run: pnpm exec gas-boost push ${{ inputs.environment }}
 
             - name: Debug dist output
               run: |
@@ -116,7 +116,7 @@ jobs:
             - name: Deploy to GAS
               id: deploy
               run: |
-                  npx -y -p dotenv -p vite -p @mydx-dev/gas-boost-cli@latest gas-boost deploy ${{ inputs.environment }} | tee deploy.log
+                  pnpm exec gas-boost deploy ${{ inputs.environment }} | tee deploy.log
                   URL=$(grep -Eo 'WEB_APP_URL=\S+' deploy.log | tail -n1 | cut -d= -f2-)
                   DEPLOY_ID=$(grep -Eo 'DEPLOY_ID=\S+' deploy.log | tail -n1 | cut -d= -f2-)
                   if [ -z "$DEPLOY_ID" ]; then
