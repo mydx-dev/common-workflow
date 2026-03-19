@@ -39,10 +39,13 @@ jobs:
 
             - uses: actions/setup-node@v4
               with:
-                  node-version: "20"
-                  cache: "pnpm"
+                  node-version: "24"
 
             - run: corepack enable
+
+            - run: corepack prepare pnpm@9.12.3 --activate
+
+            - run: pnpm --version
 
             - name: Configure npm auth
               run: |
