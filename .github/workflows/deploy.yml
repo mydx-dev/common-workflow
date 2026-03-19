@@ -97,7 +97,7 @@ jobs:
 
             - name: Debug clasp status
               run: |
-                  npx clasp status -P ../config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
+                  npx clasp status -P config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
               env:
                   ENVIRONMENT: ${{ inputs.environment }}
 
