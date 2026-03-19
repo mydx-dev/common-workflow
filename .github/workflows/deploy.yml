@@ -59,19 +59,6 @@ jobs:
 
             - run: pnpm install
 
-            - name: Prepare gas-boost cli (isolated)
-              run: |
-                  set -e
-                  TOOL_DIR="$RUNNER_TEMP/gas-boost-cli"
-                  rm -rf "$TOOL_DIR"
-                  mkdir -p "$TOOL_DIR"
-                  cd "$TOOL_DIR"
-                  pnpm init -y
-                  pnpm add -D dotenv vite @mydx-dev/gas-boost-cli@latest
-                  echo "GAS_BOOST_CLI_HOME=$TOOL_DIR" >> "$GITHUB_ENV"
-              env:
-                  NPM_CONFIG_USERCONFIG: ${{ github.workspace }}/.npmrc
-
             - name: Write clasp credentials
               run: |
                   printf '%s' "$CLASP_CREDENTIALS" > ~/.clasprc.json
@@ -90,7 +77,7 @@ jobs:
             - name: Debug gas-boost version
               run: |
                   node -e "const p=require('./package.json');console.log('gas-boost-cli dep:', p.devDependencies?.['@mydx-dev/gas-boost-cli'] || p.dependencies?.['@mydx-dev/gas-boost-cli'] || 'missing');"
-                  "$GAS_BOOST_CLI_HOME/node_modules/.bin/gas-boost" --version
+                  pnpm gas-boost --version
 
             - name: Normalize clasp rootDir
               run: |
@@ -106,7 +93,7 @@ jobs:
 
             - name: Push to GAS
               run: |
-                  "$GAS_BOOST_CLI_HOME/node_modules/.bin/gas-boost" push ${{ inputs.environment }}
+                  pnpm gas-boost push ${{ inputs.environment }}
 
             - name: Debug dist output
               run: |
@@ -130,7 +117,7 @@ jobs:
             - name: Deploy to GAS
               id: deploy
               run: |
-                  "$GAS_BOOST_CLI_HOME/node_modules/.bin/gas-boost" deploy ${{ inputs.environment }} | tee deploy.log
+                  pnpm gas-boost deploy ${{ inputs.environment }} | tee deploy.log
                   URL=$(grep -Eo 'WEB_APP_URL=\S+' deploy.log | tail -n1 | cut -d= -f2-)
                   DEPLOY_ID=$(grep -Eo 'DEPLOY_ID=\S+' deploy.log | tail -n1 | cut -d= -f2-)
                   if [ -z "$DEPLOY_ID" ]; then
