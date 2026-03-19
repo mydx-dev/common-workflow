@@ -79,9 +79,10 @@ jobs:
                   node -e "const p=require('./package.json');console.log('gas-boost-cli dep:', p.devDependencies?.['@mydx-dev/gas-boost-cli'] || p.dependencies?.['@mydx-dev/gas-boost-cli'] || 'missing');"
                   pnpm gas-boost --version
 
-            - name: Normalize clasp rootDir
+            - name: Debug clasp status (dist, before push)
               run: |
-                  node -e "const fs=require('fs');const p='config/.clasp.'+process.env.ENVIRONMENT+'.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.rootDir='../dist';fs.writeFileSync(p,JSON.stringify(j,null,2));"
+                  cd dist
+                  npx clasp status -P ../config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
               env:
                   ENVIRONMENT: ${{ inputs.environment }}
 
@@ -89,21 +90,17 @@ jobs:
               run: |
                   pnpm gas-boost push ${{ inputs.environment }}
 
-            - name: Debug clasp status (repo root, before push)
+            - name: Force clasp push (dist)
               run: |
-                  npx clasp status -P config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
+                  cd dist
+                  npx clasp push -f -P ../config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
               env:
                   ENVIRONMENT: ${{ inputs.environment }}
 
-            - name: Debug clasp status (repo root, after push)
+            - name: Debug clasp status (dist, after push)
               run: |
-                  npx clasp status -P config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
-              env:
-                  ENVIRONMENT: ${{ inputs.environment }}
-
-            - name: Force clasp push (repo root)
-              run: |
-                  npx clasp push -f -P config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
+                  cd dist
+                  npx clasp status -P ../config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
               env:
                   ENVIRONMENT: ${{ inputs.environment }}
 
