@@ -85,6 +85,22 @@ jobs:
               env:
                   ENVIRONMENT: ${{ inputs.environment }}
 
+            - name: Debug pre-push dist
+              run: |
+                  ls -la dist || true
+
+            - name: Debug scriptId suffix
+              run: |
+                  node -e "const fs=require('fs');const p='config/.clasp.'+process.env.ENVIRONMENT+'.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));const id=String(j.scriptId||'');console.log('scriptId suffix:', id.slice(-6));"
+              env:
+                  ENVIRONMENT: ${{ inputs.environment }}
+
+            - name: Debug clasp status
+              run: |
+                  npx clasp status -P ../config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
+              env:
+                  ENVIRONMENT: ${{ inputs.environment }}
+
             - name: Push to GAS
               run: pnpm exec gas-boost push ${{ inputs.environment }}
 
