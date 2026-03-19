@@ -59,6 +59,10 @@ jobs:
 
             - run: pnpm install
 
+            - name: Debug deploy ID
+              run: |
+                  echo "DEPLOY_ID=${{ vars.DEPLOY_ID }}"
+
             - name: Write clasp credentials
               run: |
                   printf '%s' "$CLASP_CREDENTIALS" > ~/.clasprc.json
