@@ -63,6 +63,11 @@ jobs:
               run: |
                   echo "DEPLOY_ID=${{ vars.DEPLOY_ID }}"
 
+            - name: Debug gas-boost resolution
+              run: |
+                  node -p "require('./node_modules/@mydx-dev/gas-boost-cli/package.json').version"
+                  ls -l node_modules/.bin/gas-boost
+
             - name: Write clasp credentials
               run: |
                   printf '%s' "$CLASP_CREDENTIALS" > ~/.clasprc.json
