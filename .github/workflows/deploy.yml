@@ -83,6 +83,9 @@ jobs:
                   pnpm exec gas-boost deploy ${{ inputs.environment }} | tee deploy.log
                   URL=$(grep -Eo 'WEB_APP_URL=\S+' deploy.log | tail -n1 | cut -d= -f2-)
                   DEPLOY_ID=$(grep -Eo 'DEPLOY_ID=\S+' deploy.log | tail -n1 | cut -d= -f2-)
+                  if [ -z "$DEPLOY_ID" ]; then
+                    DEPLOY_ID=$(grep -Eo 'New deploymentId: \S+' deploy.log | tail -n1 | awk '{print $3}')
+                  fi
                   echo "web_app_url=$URL" >> $GITHUB_OUTPUT
                   echo "deploy_id=$DEPLOY_ID" >> $GITHUB_OUTPUT
 
