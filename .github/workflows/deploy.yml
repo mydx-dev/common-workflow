@@ -74,6 +74,12 @@ jobs:
                   ENVIRONMENT: ${{ inputs.environment }}
                   CLASP_JSON: ${{ secrets[inputs.clasp_json_secret] }}
 
+            - name: Normalize clasp rootDir
+              run: |
+                node -e "const fs=require('fs');const p='config/.clasp.'+process.env.ENVIRONMENT+'.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.rootDir='.';fs.writeFileSync(p,JSON.stringify(j,null,2));"
+              env:
+                ENVIRONMENT: ${{ inputs.environment }}
+
             - name: Push to GAS
               run: pnpm exec gas-boost push ${{ inputs.environment }}
 
