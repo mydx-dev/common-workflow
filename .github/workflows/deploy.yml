@@ -83,6 +83,13 @@ jobs:
               run: |
                   pnpm gas-boost push ${{ inputs.environment }}
 
+            - name: Sync clasp cache (dist)
+              run: |
+                  cd dist
+                  npx clasp pull -P ../config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
+              env:
+                  ENVIRONMENT: ${{ inputs.environment }}
+
             - name: Force clasp push (dist)
               run: |
                   cd dist
