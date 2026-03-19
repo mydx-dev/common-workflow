@@ -59,6 +59,9 @@ jobs:
 
             - run: pnpm install
 
+            - name: Install build deps for dlx
+              run: pnpm add -D --no-save dotenv vite
+
             - name: Write clasp credentials
               run: |
                   printf '%s' "$CLASP_CREDENTIALS" > ~/.clasprc.json
