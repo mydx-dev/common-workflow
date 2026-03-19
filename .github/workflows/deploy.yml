@@ -74,12 +74,6 @@ jobs:
                   ENVIRONMENT: ${{ inputs.environment }}
                   CLASP_JSON: ${{ secrets[inputs.clasp_json_secret] }}
 
-            - name: Debug gas-boost version
-              run: |
-                  node -e "const p=require('./package.json');console.log('gas-boost-cli dep:', p.devDependencies?.['@mydx-dev/gas-boost-cli'] || p.dependencies?.['@mydx-dev/gas-boost-cli'] || 'missing');"
-                  pnpm gas-boost --version
-                  npx clasp --version
-
             - name: Normalize clasp rootDir
               run: |
                   node -e "const fs=require('fs');const p='config/.clasp.'+process.env.ENVIRONMENT+'.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.rootDir='../dist';fs.writeFileSync(p,JSON.stringify(j,null,2));"
@@ -94,32 +88,6 @@ jobs:
               run: |
                   cd dist
                   npx clasp push -f -P ../config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
-              env:
-                  ENVIRONMENT: ${{ inputs.environment }}
-
-            - name: Debug clasp status (dist, after push)
-              run: |
-                  cd dist
-                  npx clasp status -P ../config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
-              env:
-                  ENVIRONMENT: ${{ inputs.environment }}
-
-            - name: Debug dist output
-              run: |
-                  pwd
-                  ls -la
-                  ls -la dist || true
-
-            - name: Debug clasp status
-              run: |
-                  cd dist
-                  npx clasp status -P ../config/.clasp.${ENVIRONMENT}.json -A ~/.clasprc.json
-              env:
-                  ENVIRONMENT: ${{ inputs.environment }}
-
-            - name: Debug clasp config
-              run: |
-                  cat config/.clasp.${ENVIRONMENT}.json
               env:
                   ENVIRONMENT: ${{ inputs.environment }}
 
