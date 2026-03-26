@@ -77,10 +77,10 @@ jobs:
             - name: Initialize project
               run: |
                   ARGS="--here --yes"
-                  if [ "${{ inputs.create_dev_project }}" = "true" ]; then ARGS="$ARGS --create-dev"; fi
-                  if [ "${{ inputs.create_prd_project }}" = "true" ]; then ARGS="$ARGS --create-prd"; fi
-                  if [ "${{ inputs.use_frontend }}" = "true" ]; then ARGS="$ARGS --use-frontend"; fi
-                  if [ "${{ inputs.skip_git }}" = "true" ]; then ARGS="$ARGS --skip-git"; fi
+                  if [ "${{ inputs.create_dev_project }}" = true ]; then ARGS="$ARGS --create-dev"; fi
+                  if [ "${{ inputs.create_prd_project }}" = true ]; then ARGS="$ARGS --create-prd"; fi
+                  if [ "${{ inputs.use_frontend }}" = true ]; then ARGS="$ARGS --use-frontend"; fi
+                  if [ "${{ inputs.skip_git }}" = true ]; then ARGS="$ARGS --skip-git"; fi
                   pnpm dlx @mydx-dev/gas-boost-cli@latest init "$NPM_TOKEN" \
                       $ARGS \
                       --name "${{ inputs.project_name }}" \
