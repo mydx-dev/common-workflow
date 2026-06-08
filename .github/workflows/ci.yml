@@ -1,42 +1,57 @@
+# mydx-dev/common-workflow/.github/workflows/ci.yml
+# reusable workflow
+
 name: CI
 
 on:
-    workflow_call:
+  workflow_call:
+    secrets:
+      NPM_TOKEN:
+        required: true
 
 permissions:
-    contents: read
-    packages: read
+  contents: read
+  packages: read
 
 jobs:
-    ci:
-        if: ${{ contains(fromJSON('["mydx-dev","taiga-automate-growth"]'), github.repository_owner) }}
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  ci:
+    if: ${{ contains(fromJSON('["mydx-dev","taiga-automate-growth"]'), github.repository_owner) }}
 
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: "24"
+    runs-on: ubuntu-latest
 
-            - run: corepack enable
+    steps:
+      - uses: actions/checkout@v4
 
-            - run: corepack prepare pnpm@9.12.3 --activate
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
 
-            - run: pnpm --version
+      - run: corepack enable
 
-            - name: Configure npm auth
-              run: |
-                  echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" > .npmrc
-                  echo "@mydx-dev:registry=https://npm.pkg.github.com" >> .npmrc
-              env:
-                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: corepack prepare pnpm@9.12.3 --activate
 
-            - run: pnpm install
+      - run: pnpm --version
 
-            - name: Lint (if config exists)
-              run: |
-                  if [ -f eslint.config.mjs ]; then pnpm exec eslint .; fi
+      - name: Configure npm auth
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" > .npmrc
+          echo "@mydx-dev:registry=https://npm.pkg.github.com" >> .npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-            - name: Test (if config exists)
-              run: |
-                  if [ -f vitest.config.js ]; then pnpm exec vitest --run; fi
+      - run: pnpm install
+
+      - name: Format Check
+        run: pnpm run format:check
+
+      - name: Type Check
+        run: pnpm run typecheck
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Test
+        run: pnpm run test:ci
+
+      - name: Build
+        run: pnpm gas-boost build dev
