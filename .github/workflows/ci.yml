@@ -1,6 +1,3 @@
-# mydx-dev/common-workflow/.github/workflows/ci.yml
-# reusable workflow
-
 name: CI
 
 on:
@@ -15,8 +12,6 @@ permissions:
 
 jobs:
   ci:
-    if: ${{ contains(fromJSON('["mydx-dev","taiga-automate-growth"]'), github.repository_owner) }}
-
     runs-on: ubuntu-latest
 
     steps:
