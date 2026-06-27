@@ -43,6 +43,10 @@ jobs:
             - uses: actions/setup-node@v4
               with:
                   node-version: "24"
+            - run: |
+                node -e "console.log(process.execPath)"
+                node -e "console.log(process.env.SHELL)"
+                node -e "require('child_process').execSync('echo hello',{stdio:'inherit'})"
 
             - run: corepack enable
 
